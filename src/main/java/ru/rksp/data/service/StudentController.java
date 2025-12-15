@@ -11,46 +11,30 @@ import ru.rksp.data.model.StudentDataResponse;
 @RestController
 public class StudentController implements StudentDataApi {
 
-    // Здесь ты потом добавишь репозиторий для работы с БД
-    // private final StudentRepository studentRepository;
+    // Временное хранилище для демонстрации
+    private StudentDataResponse lastCreatedStudent = null;
 
     @Override
     public ResponseEntity<StudentDataResponse> createStudentDataInData(StudentDataCreateRequest studentDataCreateRequest) {
-
-        // 1. Здесь будет логика сохранения в БД, например:
-        // StudentEntity newStudent = new StudentEntity();
-        // newStudent.setFullName(studentDataCreateRequest.getFullName());
-        // newStudent.setPassport(studentDataCreateRequest.getPassport());
-        // StudentEntity savedStudent = studentRepository.save(newStudent);
-
-        // 2. Пока просто создаем заглушку ответа, имитируя сохранение
+        // Создаем запись студента
         StudentDataResponse response = new StudentDataResponse();
-        response.setId(1L); // Здесь будет savedStudent.getId()
+        response.setId(1L); // Фиксированный ID для демонстрации
         response.setFullName(studentDataCreateRequest.getFullName());
         response.setPassport(studentDataCreateRequest.getPassport());
 
-        // 3. Возвращаем ответ с кодом 201 (Created)
+        // Сохраняем для последующего получения
+        lastCreatedStudent = response;
+
         return ResponseEntity.status(201).body(response);
     }
 
     @Override
     public ResponseEntity<StudentDataResponse> getStudentDataByIdFromData(Long id) {
-
-        // 1. Здесь будет логика поиска в БД, например:
-        // Optional<StudentEntity> studentOptional = studentRepository.findById(id);
-        // if (studentOptional.isEmpty()) {
-        //     return ResponseEntity.notFound().build();
-        // }
-        // StudentEntity student = studentOptional.get();
-
-        // 2. Пока просто проверяем заглушку
-        if (id.equals(1L)) { // Здесь будет проверка studentOptional.isPresent()
-            StudentDataResponse response = new StudentDataResponse();
-            response.setId(id);
-            response.setFullName("Иванов Иван Иванович"); // Здесь будет student.getFullName()
-            response.setPassport("+7 999 123-45-67"); // Здесь будет student.getPassport()
-            return ResponseEntity.ok(response);
+        // Проверяем, что запрашиваемый ID соответствует созданной записи
+        if (lastCreatedStudent != null && id.equals(lastCreatedStudent.getId())) {
+            return ResponseEntity.status(200).body(lastCreatedStudent);
         } else {
+            // Если запись не найдена, возвращаем 404
             return ResponseEntity.notFound().build();
         }
     }
